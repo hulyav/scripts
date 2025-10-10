@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug: pytest (repo_stats)",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "-q",
+        "repo_stats/tests"
+      ],
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/repo_stats/src"
+      }
+    },
+    {
+      "name": "Debug: Current File (repo_stats)",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/repo_stats/src"
+      }
+    }
+  ]
+}
