@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, repo_stats_init, repo_stats_init_clean ]
   pull_request:
     branches: [ main ]
 
@@ -11,16 +11,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Install dependencies
+
+      - name: Create and activate venv, install dependencies
         run: |
           python -m venv .venv
-          .venv/bin/pip install -r repo_stats/requirements-dev.txt
-          .venv/bin/pip install -e repo_stats
+          . .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r repo_stats/requirements-dev.txt
+          pip install -e repo_stats
+
+      - name: Run pre-commit hooks
+        run: |
+          . .venv/bin/activate
+          pre-commit run --all-files
+
       - name: Run tests
-        run: .venv/bin/pytest repo_stats/tests -q
-      - name: Run linters
-        run: .venv/bin/flake8 repo_stats/src repo_stats/tests
+        run: |
+          . .venv/bin/activate
+          pytest -q repo_stats/tests
+
+      - name: Run flake8
+        run: |
+          . .venv/bin/activate
+          flake8 repo_stats
