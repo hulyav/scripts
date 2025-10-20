@@ -1,6 +1,10 @@
 {
+  // Use the package venv by default for this folder
   "python.defaultInterpreterPath": "${workspaceFolder}/repo_stats/.venv/bin/python",
+
+  // Pytest discovery settings for Test Explorer
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": ["repo_stats/tests"],
   "python.testing.unittestEnabled": false
 }
+

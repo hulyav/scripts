@@ -2,28 +2,40 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug: pytest (repo_stats)",
-      "type": "python",
+      "name": "Debug runner",
+      "type": "debugpy",
       "request": "launch",
-      "module": "pytest",
-      "args": [
-        "-q",
-        "repo_stats/tests"
-      ],
-      "justMyCode": true,
+      "program": "${workspaceFolder}/repo_stats/debug_runner.py",
       "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true,
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/repo_stats/src"
+        "PYTHONPATH": "${workspaceFolder}/repo_stats/src:${env:PYTHONPATH}"
       }
     },
     {
-      "name": "Debug: Current File (repo_stats)",
-      "type": "python",
+      "name": "Debug pytest (repo_stats)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q", "repo_stats/tests"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/repo_stats/src:${env:PYTHONPATH}"
+      }
+    },
+    {
+      "name": "Debug current file (repo_stats)",
+      "type": "debugpy",
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true,
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/repo_stats/src"
+        "PYTHONPATH": "${workspaceFolder}/repo_stats/src:${env:PYTHONPATH}"
       }
     }
   ]

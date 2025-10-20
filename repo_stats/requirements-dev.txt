@@ -1,5 +1,6 @@
 pytest
 black
+ijson
 isort
 flake8
 pre-commit

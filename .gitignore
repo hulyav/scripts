@@ -1,0 +1,12 @@
+/out.json
+/out_files.json
+*.out.json
+*_out_files.json
+*out_files.json
+All_Commits.json
+*.json
+summary_/
+summary_/*
+.venv/
+__pycache__/
+.pytest_cache/
