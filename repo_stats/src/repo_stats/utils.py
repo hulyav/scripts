@@ -28,16 +28,8 @@ def collect_commit_stats(repo_path: str, out_json: str | Path) -> int:
     # include committer info and both author and commit dates/timestamps
     # fields: hash, author_name, author_email, author_date, author_ts,
     # committer_name, committer_email, commit_date, commit_ts, message
-    # fmt: off
-    fmt = "%H%x1f%an%x1f%ae%x1f%ad%x1f%at%x1f" \
-        "%cn%x1f%ce%x1f%cd%x1f%ct%x1f%B%x1e"
-    # fmt: on
+    fmt = "%H%x1f%an%x1f%ae%x1f%ad%x1f%at%x1f%cn%x1f%ce%x1f%cd%x1f%ct%x1f%B%x1e"
 
-    # git -C <repo_path> log --all --pretty=format:
-    #   "%H%x1f%an%x1f%ae%x1f%ad%x1f%at%x1f%cn%x1f%ce%x1f%cd%x1f%ct%x1f%B%x1e"
-    # --date=iso
-
-    # Streaming mode: iterate commit hashes and write JSON array incrementally
     rev_cmd = [
         "git",
         "-C",
@@ -46,7 +38,7 @@ def collect_commit_stats(repo_path: str, out_json: str | Path) -> int:
         "--all",
         f"--pretty=format:{fmt}",
         "--date=short",
-    ]  # "--all"
+    ]
 
     proc = subprocess.Popen(
         rev_cmd, stdout=subprocess.PIPE, text=True, errors="replace"
@@ -54,11 +46,10 @@ def collect_commit_stats(repo_path: str, out_json: str | Path) -> int:
     out_path = Path(out_json)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     first = True
-    count = 0
+    count = 1
 
     with out_path.open("w", encoding="utf-8") as fh:
         fh.write("[")
-        fh.flush()
         if proc.stdout is None:
             proc.wait()
             fh.write("]")
@@ -111,7 +102,7 @@ def collect_commit_stats(repo_path: str, out_json: str | Path) -> int:
                     commit_timestamp = None
 
                 obj = {
-                    "count": count + 1,
+                    "count": count,
                     "hash": commit_hash,
                     "author_name": author_name,
                     "author_email": author_email,
@@ -128,7 +119,7 @@ def collect_commit_stats(repo_path: str, out_json: str | Path) -> int:
                 if not first:
                     fh.write(",\n")
                 fh.write(json.dumps(obj, ensure_ascii=False))
-                fh.flush()
+
                 first = False
                 count += 1
 
@@ -181,18 +172,15 @@ def collect_commit_file_stats(
     out_path_sum.parent.mkdir(parents=True, exist_ok=True)
 
     first = True
-    count = files_start_count
+    count = files_start_count + 1
     first_sum = True
     with out_path_sum.open("w", encoding="utf-8") as fh_sum:
         fh_sum.write("[")
-        fh_sum.flush()
         with out_path.open("w", encoding="utf-8") as fh:
             fh.write("[")
-            fh.flush()
 
             for commit in commits:
-                # print(count)
-                print(commit["count"], count + 1)
+                print(commit["count"], count)
                 try:
                     commit_hash = commit["hash"]
                     files_out = subprocess.check_output(
@@ -229,7 +217,7 @@ def collect_commit_file_stats(
                             file,
                         ) = divs[:3]
                         obj = {
-                            "count": count + 1,
+                            "count": count,
                             "hash": commit_hash,
                             "insertions": insertions,
                             "deletions": deletions,
@@ -251,12 +239,10 @@ def collect_commit_file_stats(
                         if is_extra:
                             insertions_count_exc += insertions_int
                             deletions_count_exc += deletions_int
-                            # print ("extra detected", commit["hash"],file)
 
                         if not first:
                             fh.write(",\n")
                         fh.write(json.dumps(obj, ensure_ascii=False))
-                        fh.flush()
                         first = False
                         count += 1
 
@@ -274,7 +260,6 @@ def collect_commit_file_stats(
                     if not first_sum:
                         fh_sum.write(",\n")
                     fh_sum.write(json.dumps(obj, ensure_ascii=False))
-                    fh_sum.flush()
                     first_sum = False
 
                 except subprocess.CalledProcessError:
@@ -288,49 +273,3 @@ def collect_commit_file_stats(
         fh_sum.write("]")
 
     return count
-
-
-def main():
-    import argparse
-    import os
-
-    parser = argparse.ArgumentParser(description="Collect git commit stats to JSON")
-    default_repo = os.path.expanduser("~/githubRepos/MySQL/mysql-server")
-
-    parser.add_argument(
-        "--repo",
-        default=default_repo,
-        help="Path to local git repository",
-    )
-    parser.add_argument(
-        "--out",
-        default="out.json",
-        help="Output JSON file path",
-    )
-    args = parser.parse_args()
-
-    result = collect_commit_stats(args.repo, args.out)
-    result = collect_commit_file_stats("out.json", 0, 3, args.repo, "out_files.json")
-    # result = collect_commit_file_stats
-    #   ("out.json", 20760, 303520, args.repo, "out_files.json")
-    # excluding start, including stop
-    # result = collect_commit_file_stats(
-    #     "out.json",
-    #     20760,
-    #     303520,
-    #     args.repo,
-    #     "out_files.json",
-    #     424556,
-    # )
-    # result = collect_commit_file_stats(
-    #     "out.json",
-    #     303520,
-    #     303521,
-    #     args.repo,
-    #     "out_files.json",
-    # )
-    print(result)
-
-
-if __name__ == "__main__":
-    main()

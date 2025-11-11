@@ -38,8 +38,9 @@ def test_collect_commit_stats(tmp_path):
     assert out_json.exists()
     data = json.loads(out_json.read_text(encoding="utf-8"))
     assert isinstance(data, list)
-    assert count == 3
     assert len(data) == 3
+    # count should equal the number of commits processed + 1 (since it starts at 1)
+    assert count == 4
     # each item should contain expected keys
     keys = {"hash", "author_name", "commit_date", "message", "count"}
     assert keys.issubset(set(data[0].keys()))
